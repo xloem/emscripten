@@ -17,6 +17,7 @@ See docs/process.md for how version tagging works.
 
 Current Trunk
 -------------
+- Require format string for emscripten_log.
 - Refactor syscall interface: Syscalls are no longer variadic (except those
   that are inherantly such as open) and no longer take the syscall number as
   arg0.  This should be invisible to most users but will effect any external
