@@ -116,11 +116,8 @@ console.log('*ok*');
 
 // Part 2
 
-console.log('waka1');
 var suser = new TheModule.StringUser("hello", 43);
-console.log('waka2');
 suser.Print(41, "world");
-console.log('waka3');
 suser.PrintFloat(12.3456);
 console.log(suser.returnAString());
 
