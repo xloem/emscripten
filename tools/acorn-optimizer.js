@@ -806,6 +806,20 @@ function makeCallExpression(node, name, args) {
   });
 }
 
+function isHEAP(name) {
+  switch (name) {
+    case 'HEAP8':  case 'HEAPU8':
+    case 'HEAP16': case 'HEAPU16':
+    case 'HEAP32': case 'HEAPU32':
+    case 'HEAPF32': case 'HEAPF64': {
+      return true;
+    }
+    default: {
+      return false;
+    }
+  }
+}
+
 // Instrument heap accesses to call GROWABLE_HEAP_* helper functions instead, which allows
 // pthreads + memory growth to work (we check if the memory was grown on another thread
 // in each access), see #8365.
@@ -813,19 +827,9 @@ function growableHeap(ast) {
   recursiveWalk(ast, {
     AssignmentExpression: function(node) {
       if (node.left.type === 'Identifier' &&
-          node.left.name.startsWith('HEAP')
-      ) {
+          isHEAP(node.left.name)) {
         // Don't transform initial setup of the arrays.
-        switch (node.left.name) {
-          case 'HEAP8':  case 'HEAPU8':
-          case 'HEAP16': case 'HEAPU16':
-          case 'HEAP32': case 'HEAPU32':
-          case 'HEAPF32': case 'HEAPF64': {
-            return;
-          }
-          default: {
-          }
-        }
+        return;
       }
       growableHeap(node.left);
       growableHeap(node.right);
@@ -886,11 +890,74 @@ function growableHeap(ast) {
 // Make all JS pointers unsigned. We do this by modifying things like
 // HEAP32[X >> 2] to HEAP32[X >>> 2]. We also need to handle the case of
 // HEAP32[X] and make that HEAP32[X >>> 0].
-// TODO: subarray
+// TODO: subarray, copyWithin
 function unsignPointers(ast) {
-  printErr(JSON.stringify(ast, null, ' '));
-//  recursiveWalk(ast, {
-  //});
+//  printErr(JSON.stringify(ast, null, ' '));
+
+  function unsign(node) {
+    // The pointer is often a >> shift, which we can just turn into >>>
+    if (node.type === 'BinaryExpression') {
+      if (node.operator === '>>') {
+        node.operator = '>>>';
+        return node;
+      }
+    }
+    // If nothing else worked out, add a new shift.
+    return {
+      type: 'BinaryExpression',
+      left: node,
+      operator: ">>>",
+      right: {
+        type: "Literal",
+        value: 0,
+        raw: "0",
+        start: 0,
+        end: 0,
+      },
+      start: 0,
+      end: 0,
+    };
+  }
+
+  recursiveWalk(ast, {
+    MemberExpression: function(node) {
+      // Check if this is HEAP*[?]
+      if (node.object.type === 'Identifier' &&
+          isHEAP(node.object.name) &&
+          !node.computed) {
+        return;
+      }
+      node.property = unsign(node.property);
+    },
+    CallExpression: function(node) {
+      if (node.callee.type === 'MemberExpression' &&
+          node.callee.object.type === 'Identifier' &&
+          isHEAP(node.callee.object.name) &&
+          node.callee.property.type === 'Identifier' &&
+          !node.computed) {
+        // This is a call on HEAP*.?. Specific things we need to fix up are
+        // subarray, set, and copyWithin. TODO more?
+        if (node.callee.property.name === 'set') {
+          if (node.arguments.length >= 2) {
+            node.arguments[1] = unsign(node.arguments[1]);
+          }
+        } else if (node.callee.property.name === 'subarray') {
+          if (node.arguments.length >= 1) {
+            node.arguments[0] = unsign(node.arguments[0]);
+            if (node.arguments.length >= 2) {
+              node.arguments[1] = unsign(node.arguments[1]);
+            }
+          }
+        } else if (node.callee.property.name === 'copyWithin') {
+          node.arguments[0] = unsign(node.arguments[0]);
+          node.arguments[1] = unsign(node.arguments[1]);
+          if (node.arguments.length >= 3) {
+            node.arguments[2] = unsign(node.arguments[2]);
+          }
+        }
+      }
+    }
+  });
 }
 
 function reattachComments(ast, comments) {

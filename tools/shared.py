@@ -2787,7 +2787,7 @@ class Building(object):
 
   @staticmethod
   def use_unsigned_pointers_in_js(js_file):
-    return js_file # logger.debug('using unsigned pointers in JS')
+    logger.debug('using unsigned pointers in JS')
     return Building.acorn_optimizer(js_file, ['unsignPointers'])
 
   @staticmethod
