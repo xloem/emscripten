@@ -2842,7 +2842,9 @@ LibraryManager.library = {
   // sys/times.h
   // ==========================================================================
 
+#if !WASM_BACKEND
   times__deps: ['memset'],
+#endif
   times: function(buffer) {
     // clock_t times(struct tms *buffer);
     // http://pubs.opengroup.org/onlinepubs/009695399/functions/times.html
