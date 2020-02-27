@@ -88,7 +88,6 @@ function fullWalk(node, c) {
 // Recursive post-order walk, calling properties on an object by node type,
 // if the type exists, and if so leaving recursion to that function.
 function recursiveWalk(node, cs) {
-//print('recw1 ' + JSON.stringify(node));
   (function c(node) {
     if (!(node.type in cs)) {
       visitChildren(node, function(child) {
@@ -889,8 +888,7 @@ function growableHeap(ast) {
 
 // Make all JS pointers unsigned. We do this by modifying things like
 // HEAP32[X >> 2] to HEAP32[X >>> 2]. We also need to handle the case of
-// HEAP32[X] and make that HEAP32[X >>> 0].
-// TODO: subarray, copyWithin
+// HEAP32[X] and make that HEAP32[X >>> 0], things like subarray(), etc.
 function unsignPointers(ast) {
 //  printErr(JSON.stringify(ast, null, ' '));
 

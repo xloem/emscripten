@@ -113,13 +113,16 @@ mergeInto(LibraryManager.library, {
     // May allocate more, to provide automatic geometric increase and amortized linear performance appending writes.
     // Never shrinks the storage.
     expandFileStorage: function(node, newCapacity) {
+#if CAN_ADDRESS_2GB
+      newCapacity >>>= 0;
+#endif
       var prevCapacity = node.contents ? node.contents.length : 0;
       if (prevCapacity >= newCapacity) return; // No need to expand, the storage was already large enough.
       // Don't expand strictly to the given requested limit if it's only a very small increase, but instead geometrically grow capacity.
       // For small filesizes (<1MB), perform size*2 geometric increase, but for large sizes, do a much more conservative size*1.125 increase to
       // avoid overshooting the allocation cap by a very large margin.
       var CAPACITY_DOUBLING_MAX = 1024 * 1024;
-      newCapacity = Math.max(newCapacity, (prevCapacity * (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) | 0);
+      newCapacity = Math.max(newCapacity, (prevCapacity * (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) >>> 0);
       if (prevCapacity != 0) newCapacity = Math.max(newCapacity, 256); // At minimum allocate 256b for each file when expanding.
       var oldContents = node.contents;
       node.contents = new Uint8Array(newCapacity); // Allocate new storage.
@@ -129,6 +132,9 @@ mergeInto(LibraryManager.library, {
 
     // Performs an exact resize of the backing file storage to the given size, if the size is not exactly this, the storage is fully reallocated.
     resizeFileStorage: function(node, newSize) {
+#if CAN_ADDRESS_2GB
+      newSize >>>= 0;
+#endif
       if (node.usedBytes == newSize) return;
       if (newSize == 0) {
         node.contents = null; // Fully decommit when requesting a resize to zero.
@@ -251,6 +257,11 @@ mergeInto(LibraryManager.library, {
     },
     stream_ops: {
       read: function(stream, buffer, offset, length, position) {
+#if CAN_ADDRESS_2GB
+        offset >>>= 0;
+        length >>>= 0;
+        position >>>= 0;
+#endif
         var contents = stream.node.contents;
         if (position >= stream.node.usedBytes) return 0;
         var size = Math.min(stream.node.usedBytes - position, length);
@@ -272,6 +283,11 @@ mergeInto(LibraryManager.library, {
       //         with canOwn=true, creating a copy of the bytes is avoided, but the caller shouldn't touch the passed in range
       //         of bytes anymore since their contents now represent file data inside the filesystem.
       write: function(stream, buffer, offset, length, position, canOwn) {
+#if CAN_ADDRESS_2GB
+        offset >>>= 0;
+        length >>>= 0;
+        position >>>= 0;
+#endif
 #if ASSERTIONS
         // The data buffer should be a typed array view
         assert(!(buffer instanceof ArrayBuffer));
@@ -325,11 +341,14 @@ mergeInto(LibraryManager.library, {
            node.contents[position + i] = buffer[offset + i]; // Or fall back to manual write if not.
           }
         }
-        node.usedBytes = Math.max(node.usedBytes, position+length);
+        node.usedBytes = Math.max(node.usedBytes, position + length);
         return length;
       },
 
       llseek: function(stream, offset, whence) {
+#if CAN_ADDRESS_2GB
+        offset >>>= 0;
+#endif
         var position = offset;
         if (whence === {{{ cDefine('SEEK_CUR') }}}) {
           position += stream.position;
@@ -344,10 +363,19 @@ mergeInto(LibraryManager.library, {
         return position;
       },
       allocate: function(stream, offset, length) {
+#if CAN_ADDRESS_2GB
+        offset >>>= 0;
+        length >>>= 0;
+#endif
         MEMFS.expandFileStorage(stream.node, offset + length);
         stream.node.usedBytes = Math.max(stream.node.usedBytes, offset + length);
       },
       mmap: function(stream, buffer, offset, length, position, prot, flags) {
+#if CAN_ADDRESS_2GB
+        offset >>>= 0;
+        length >>>= 0;
+        position >>>= 0;
+#endif
 #if ASSERTIONS
         // The data buffer should be a typed array view
         assert(!(buffer instanceof ArrayBuffer));
@@ -387,6 +415,10 @@ mergeInto(LibraryManager.library, {
         return { ptr: ptr, allocated: allocated };
       },
       msync: function(stream, buffer, offset, length, mmapFlags) {
+#if CAN_ADDRESS_2GB
+        offset >>>= 0;
+        length >>>= 0;
+#endif
         if (!FS.isFile(stream.node.mode)) {
           throw new FS.ErrnoError({{{ cDefine('ENODEV') }}});
         }

@@ -1986,6 +1986,11 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     if not shared.Settings.LEGALIZE_JS_FFI:
       assert shared.Building.is_wasm_only(), 'LEGALIZE_JS_FFI incompatible with RUNNING_JS_OPTS.'
 
+    # XXX
+    shared.Settings.ALLOW_MEMORY_GROWTH = 1
+    shared.Settings.MAXIMUM_MEMORY = -1
+    # XXX
+
     if shared.Settings.INITIAL_MEMORY >= 2 * 1024 * 1024 * 1024 or \
        (shared.Settings.ALLOW_MEMORY_GROWTH and
         shared.Settings.MAXIMUM_MEMORY < 0 or
