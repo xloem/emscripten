@@ -845,7 +845,7 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
   with ToolchainProfiler.profile_block('parse arguments and setup'):
     ## Parse args
 
-    newargs = list(args)# + ['--profiling']
+    newargs = list(args) + ['--profiling']
 
     # Scan and strip emscripten specific cmdline warning flags.
     # This needs to run before other cmdline flags have been parsed, so that
@@ -1130,6 +1130,9 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     if shared.Settings.MINIMAL_RUNTIME or 'MINIMAL_RUNTIME=1' in settings_changes or 'MINIMAL_RUNTIME=2' in settings_changes:
       # Remove the default exported functions 'malloc', 'free', etc. those should only be linked in if used
       shared.Settings.DEFAULT_LIBRARY_FUNCS_TO_INCLUDE = []
+
+    if not shared.Settings.WASM_BACKEND:
+      shared.Settings.DEFAULT_LIBRARY_FUNCS_TO_INCLUDE.append('memset')
 
     # Set ASM_JS default here so that we can override it from the command line.
     shared.Settings.ASM_JS = 1 if options.opt_level > 0 else 2

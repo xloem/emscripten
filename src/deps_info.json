@@ -19,7 +19,7 @@
   "realloc": ["malloc", "free"],
   "getlogin": ["malloc", "_get_environ"],
   "tmpnam": ["malloc"],
-  "mmap": ["emscripten_builtin_memalign", "memalign"],
+  "mmap": ["emscripten_builtin_memalign", "memalign", "memset"],
   "realpath": ["malloc"],
   "strerror": ["malloc"],
   "__ctype_b_loc": ["malloc"],

@@ -1424,6 +1424,7 @@ def calculate(temp_files, in_temp, stdout_, stderr_, forced=[]):
     symbolses[0].undefs.add(demangle_c_symbol_name(export))
 
   for symbols in symbolses:
+    print(symbols.undefs)
     add_back_deps(symbols)
 
   # If we are only doing forced stdlibs, then we don't know the actual symbols we need,
