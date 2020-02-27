@@ -919,16 +919,15 @@ function unsignPointers(ast) {
     };
   }
 
-  recursiveWalk(ast, {
-    MemberExpression: function(node) {
+  fullWalk(ast, function(node) {
+    if (node.type === 'MemberExpression') {
       // Check if this is HEAP*[?]
       if (node.object.type === 'Identifier' &&
           isHEAP(node.object.name) &&
           node.computed) {
         node.property = unsign(node.property);
       }
-    },
-    CallExpression: function(node) {
+    } else if (node.type === 'CallExpression') {
       if (node.callee.type === 'MemberExpression' &&
           node.callee.object.type === 'Identifier' &&
           isHEAP(node.callee.object.name) &&

@@ -20,4 +20,5 @@ HEAPU8.subarray(x, y);
 
 process.versions.node; // something completely different
 
+insideCall(HEAP32[x >> 2]);
 
