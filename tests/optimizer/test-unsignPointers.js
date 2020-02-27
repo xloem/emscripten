@@ -18,3 +18,6 @@ HEAPU8.subarray(x);
 
 HEAPU8.subarray(x, y);
 
+process.versions.node; // something completely different
+
+

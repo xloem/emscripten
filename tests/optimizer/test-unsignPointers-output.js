@@ -17,3 +17,5 @@ HEAPU8.subarray();
 HEAPU8.subarray(x >>> 0);
 
 HEAPU8.subarray(x >>> 0, y >>> 0);
+
+process.versions.node;

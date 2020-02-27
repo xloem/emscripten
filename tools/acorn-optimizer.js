@@ -924,10 +924,9 @@ function unsignPointers(ast) {
       // Check if this is HEAP*[?]
       if (node.object.type === 'Identifier' &&
           isHEAP(node.object.name) &&
-          !node.computed) {
-        return;
+          node.computed) {
+        node.property = unsign(node.property);
       }
-      node.property = unsign(node.property);
     },
     CallExpression: function(node) {
       if (node.callee.type === 'MemberExpression' &&
