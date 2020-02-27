@@ -257,11 +257,6 @@ mergeInto(LibraryManager.library, {
     },
     stream_ops: {
       read: function(stream, buffer, offset, length, position) {
-#if CAN_ADDRESS_2GB
-        offset >>>= 0;
-        length >>>= 0;
-        position >>>= 0;
-#endif
         var contents = stream.node.contents;
         if (position >= stream.node.usedBytes) return 0;
         var size = Math.min(stream.node.usedBytes - position, length);
@@ -283,11 +278,6 @@ mergeInto(LibraryManager.library, {
       //         with canOwn=true, creating a copy of the bytes is avoided, but the caller shouldn't touch the passed in range
       //         of bytes anymore since their contents now represent file data inside the filesystem.
       write: function(stream, buffer, offset, length, position, canOwn) {
-#if CAN_ADDRESS_2GB
-        offset >>>= 0;
-        length >>>= 0;
-        position >>>= 0;
-#endif
 #if ASSERTIONS
         // The data buffer should be a typed array view
         assert(!(buffer instanceof ArrayBuffer));
@@ -346,9 +336,6 @@ mergeInto(LibraryManager.library, {
       },
 
       llseek: function(stream, offset, whence) {
-#if CAN_ADDRESS_2GB
-        offset >>>= 0;
-#endif
         var position = offset;
         if (whence === {{{ cDefine('SEEK_CUR') }}}) {
           position += stream.position;
@@ -363,19 +350,10 @@ mergeInto(LibraryManager.library, {
         return position;
       },
       allocate: function(stream, offset, length) {
-#if CAN_ADDRESS_2GB
-        offset >>>= 0;
-        length >>>= 0;
-#endif
         MEMFS.expandFileStorage(stream.node, offset + length);
         stream.node.usedBytes = Math.max(stream.node.usedBytes, offset + length);
       },
       mmap: function(stream, buffer, offset, length, position, prot, flags) {
-#if CAN_ADDRESS_2GB
-        offset >>>= 0;
-        length >>>= 0;
-        position >>>= 0;
-#endif
 #if ASSERTIONS
         // The data buffer should be a typed array view
         assert(!(buffer instanceof ArrayBuffer));
@@ -415,10 +393,6 @@ mergeInto(LibraryManager.library, {
         return { ptr: ptr, allocated: allocated };
       },
       msync: function(stream, buffer, offset, length, mmapFlags) {
-#if CAN_ADDRESS_2GB
-        offset >>>= 0;
-        length >>>= 0;
-#endif
         if (!FS.isFile(stream.node.mode)) {
           throw new FS.ErrnoError({{{ cDefine('ENODEV') }}});
         }
