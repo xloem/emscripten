@@ -1986,6 +1986,12 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     if not shared.Settings.LEGALIZE_JS_FFI:
       assert shared.Building.is_wasm_only(), 'LEGALIZE_JS_FFI incompatible with RUNNING_JS_OPTS.'
 
+    if shared.Settings.INITIAL_MEMORY >= 2 * 1024 * 1024 * 1024 or \
+       (shared.Settings.ALLOW_MEMORY_GROWTH and
+        shared.Settings.MAXIMUM_MEMORY < 0 or
+        shared.Settings.MAXIMUM_MEMORY >= 2 * 1024 * 1024 * 1024):
+      shared.Settings.CAN_ADDRESS_2GB = 1
+
     shared.Settings.EMSCRIPTEN_VERSION = shared.EMSCRIPTEN_VERSION
     shared.Settings.OPT_LEVEL = options.opt_level
     shared.Settings.DEBUG_LEVEL = options.debug_level
@@ -3244,6 +3250,12 @@ def do_binaryen(target, asm_target, options, memfile, wasm_binary_target,
   # pthreads memory growth requires some additional JS fixups
   if shared.Settings.USE_PTHREADS and shared.Settings.ALLOW_MEMORY_GROWTH:
     final = shared.Building.apply_wasm_memory_growth(final)
+
+  # >=2GB heap support requires pointers in JS to be unsigned. rather than
+  # require all pointers to be unsigned by default, which increases code size
+  # a little, keep them signed, and just unsign them here if we need that.
+  if shared.Settings.CAN_ADDRESS_2GB:
+    final = shared.Building.use_unsigned_pointers_in_js(final)
 
   if options.opt_level >= 2 and options.debug_level <= 2:
     # minify the JS

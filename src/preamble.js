@@ -499,9 +499,6 @@ function preRun() {
 }
 
 function initRuntime() {
-  console.log('pre', HEAP8.length);
-  _emscripten_resize_heap(2 * 1024 * 1024 * 1024 + HEAP8.length);
-  console.log('pre', HEAPU8.length);
 #if STACK_OVERFLOW_CHECK
   checkStackCookie();
 #endif

@@ -883,6 +883,16 @@ function growableHeap(ast) {
   });
 }
 
+// Make all JS pointers unsigned. We do this by modifying things like
+// HEAP32[X >> 2] to HEAP32[X >>> 2]. We also need to handle the case of
+// HEAP32[X] and make that HEAP32[X >>> 0].
+// TODO: subarray
+function unsignPointers(ast) {
+  printErr(JSON.stringify(ast, null, ' '));
+//  recursiveWalk(ast, {
+  //});
+}
+
 function reattachComments(ast, comments) {
   var symbols = [];
 
@@ -974,6 +984,7 @@ var registry = {
   noPrint: function() { noPrint = true },
   dump: function() { dump(ast) },
   growableHeap: growableHeap,
+  unsignPointers: unsignPointers,
 };
 
 passes.forEach(function(pass) {
