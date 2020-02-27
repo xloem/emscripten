@@ -388,6 +388,9 @@ mergeInto(LibraryManager.library, {
           if (!ptr) {
             throw new FS.ErrnoError({{{ cDefine('ENOMEM') }}});
           }
+#if CAN_ADDRESS_2GB
+          ptr >>>= 0;
+#endif
           (fromHeap ? HEAP8 : buffer).set(contents, ptr);
         }
         return { ptr: ptr, allocated: allocated };
