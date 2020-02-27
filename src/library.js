@@ -489,7 +489,7 @@ LibraryManager.library = {
     try {
 #if WASM
       // round size grow request up to wasm page size (fixed 64KB per spec)
-      wasmMemory.grow((size - buffer.byteLength + 65535) >> 16); // .grow() takes a delta compared to the previous size
+      wasmMemory.grow((size - buffer.byteLength + 65535) >>> 16); // .grow() takes a delta compared to the previous size
       updateGlobalBufferAndViews(wasmMemory.buffer);
 #else // asm.js:
       var newBuffer = new ArrayBuffer(size);
@@ -565,7 +565,7 @@ LibraryManager.library = {
     // (the wasm binary specifies it, so if we tried, we'd fail anyhow).
     var maxHeapSize = {{{ MAXIMUM_MEMORY }}};
 #else
-    var maxHeapSize = 2147483648 - PAGE_MULTIPLE;
+    var maxHeapSize = 4294967296 - PAGE_MULTIPLE;
 #endif
     if (requestedSize > maxHeapSize) {
 #if ASSERTIONS

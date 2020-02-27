@@ -1199,6 +1199,8 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
         exit_with_error('--emrun is not compatible with -s MINIMAL_RUNTIME=1')
       shared.Settings.EXPORTED_RUNTIME_METHODS.append('addOnExit')
 
+      shared.Settings.EXPORTED_RUNTIME_METHODS.append('emscripten_resize_heap')
+
     if options.use_closure_compiler:
       shared.Settings.USE_CLOSURE_COMPILER = options.use_closure_compiler
       # when we emit asm.js, closure 2 would break that, so warn (note that

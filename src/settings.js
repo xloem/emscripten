@@ -168,7 +168,7 @@ var MAXIMUM_MEMORY = -1;
 // ALLOW_MEMORY_GROWTH enables fully standard behavior, of both malloc
 // returning 0 when it fails, and also of being able to allocate more
 // memory from the system as necessary.
-var ALLOW_MEMORY_GROWTH = 0;
+var ALLOW_MEMORY_GROWTH = 1;
 
 // If ALLOW_MEMORY_GROWTH is true, this variable specifies the geometric
 // overgrowth rate of the heap at resize. Specify MEMORY_GROWTH_GEOMETRIC_STEP=0
