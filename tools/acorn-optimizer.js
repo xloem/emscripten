@@ -805,7 +805,7 @@ function makeCallExpression(node, name, args) {
   });
 }
 
-function isHEAP(name) {
+function isEmscriptenHEAP(name) {
   switch (name) {
     case 'HEAP8':  case 'HEAPU8':
     case 'HEAP16': case 'HEAPU16':
@@ -826,7 +826,7 @@ function growableHeap(ast) {
   recursiveWalk(ast, {
     AssignmentExpression: function(node) {
       if (node.left.type === 'Identifier' &&
-          isHEAP(node.left.name)) {
+          isEmscriptenHEAP(node.left.name)) {
         // Don't transform initial setup of the arrays.
         return;
       }
@@ -890,7 +890,12 @@ function growableHeap(ast) {
 // HEAP32[X >> 2] to HEAP32[X >>> 2]. We also need to handle the case of
 // HEAP32[X] and make that HEAP32[X >>> 0], things like subarray(), etc.
 function unsignPointers(ast) {
-//  printErr(JSON.stringify(ast, null, ' '));
+  // Aside from the standard emscripten HEAP*s, also identify just "HEAP"/"heap"
+  // as representing a heap. This can be used in JS library code in order
+  // to get this pass to fix it up.
+  function isHeap(name) {
+    return isEmscriptenHEAP(name) || name === 'heap' || name === 'HEAP';
+  }
 
   function unsign(node) {
     // The pointer is often a >> shift, which we can just turn into >>>
@@ -921,14 +926,14 @@ function unsignPointers(ast) {
     if (node.type === 'MemberExpression') {
       // Check if this is HEAP*[?]
       if (node.object.type === 'Identifier' &&
-          isHEAP(node.object.name) &&
+          isHeap(node.object.name) &&
           node.computed) {
         node.property = unsign(node.property);
       }
     } else if (node.type === 'CallExpression') {
       if (node.callee.type === 'MemberExpression' &&
           node.callee.object.type === 'Identifier' &&
-          isHEAP(node.callee.object.name) &&
+          isHeap(node.callee.object.name) &&
           node.callee.property.type === 'Identifier' &&
           !node.computed) {
         // This is a call on HEAP*.?. Specific things we need to fix up are

@@ -21,3 +21,9 @@ HEAPU8.subarray(x >>> 0, y >>> 0);
 process.versions.node;
 
 insideCall(HEAP32[x >>> 2]);
+
+heap[x >>> 0];
+
+HEAP[x >>> 0];
+
+HeAp[x];

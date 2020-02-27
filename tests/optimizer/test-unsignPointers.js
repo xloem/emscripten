@@ -22,3 +22,8 @@ process.versions.node; // something completely different
 
 insideCall(HEAP32[x >> 2]);
 
+heap[x];
+
+HEAP[x];
+
+HeAp[x]; // but not this
