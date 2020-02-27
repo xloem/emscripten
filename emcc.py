@@ -1991,6 +1991,8 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
         shared.Settings.MAXIMUM_MEMORY < 0 or
         shared.Settings.MAXIMUM_MEMORY >= 2 * 1024 * 1024 * 1024):
       shared.Settings.CAN_ADDRESS_2GB = 1
+      if shared.Settings.MALLOC == 'emmalloc':
+        exit_with_error('emmalloc only works on <2GB of memory. Use the default allocator, or decrease INITIAL_MEMORY and/or MAXIMUM_MEMORY')
 
     shared.Settings.EMSCRIPTEN_VERSION = shared.EMSCRIPTEN_VERSION
     shared.Settings.OPT_LEVEL = options.opt_level
