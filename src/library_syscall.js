@@ -271,7 +271,7 @@ var SyscallsLibrary = {
 #if CAN_ADDRESS_2GB
     addr >>>= 0;
 #endif
-    if (addr === {{{ cDefine('MAP_FAILED') }}} || len === 0) {
+    if ((addr | 0) === {{{ cDefine('MAP_FAILED') }}} || len === 0) {
       return -{{{ cDefine('EINVAL') }}};
     }
     // TODO: support unmmap'ing parts of allocations
