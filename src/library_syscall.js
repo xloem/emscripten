@@ -251,6 +251,9 @@ var SyscallsLibrary = {
       ptr = res.ptr;
       allocated = res.allocated;
     }
+#if CAN_ADDRESS_2GB
+    ptr >>>= 0;
+#endif
     SYSCALLS.mappings[ptr] = { malloc: ptr, len: len, allocated: allocated, fd: fd, flags: flags, offset: off };
     return ptr;
 #else // no filesystem support; report lack of support
@@ -265,6 +268,9 @@ var SyscallsLibrary = {
   ],
   $syscallMunmap: function(addr, len) {
 #if FILESYSTEM && SYSCALLS_REQUIRE_FILESYSTEM
+#if CAN_ADDRESS_2GB
+    addr >>>= 0;
+#endif
     if (addr === {{{ cDefine('MAP_FAILED') }}} || len === 0) {
       return -{{{ cDefine('EINVAL') }}};
     }
@@ -881,6 +887,9 @@ var SyscallsLibrary = {
     return total;
   },
   __syscall144: function(addr, len, flags) { // msync
+#if CAN_ADDRESS_2GB
+    addr >>>= 0;
+#endif
     var info = SYSCALLS.mappings[addr];
     if (!info) return 0;
     SYSCALLS.doMsync(addr, FS.getStream(info.fd), len, info.flags, 0);
