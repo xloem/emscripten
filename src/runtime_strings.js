@@ -17,6 +17,9 @@ var UTF8Decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf8') :
  * @return {string}
  */
 function UTF8ArrayToString(heap, idx, maxBytesToRead) {
+#if CAN_ADDRESS_2GB
+  idx >>>= 0;
+#endif
   var endIdx = idx + maxBytesToRead;
 #if TEXTDECODER
   var endPtr = idx;
@@ -96,6 +99,9 @@ function UTF8ArrayToString(heap, idx, maxBytesToRead) {
  * @return {string}
  */
 function UTF8ToString(ptr, maxBytesToRead) {
+#if CAN_ADDRESS_2GB
+  ptr >>>= 0;
+#endif
 #if TEXTDECODER == 2
   if (!ptr) return '';
   var maxPtr = ptr + maxBytesToRead;
@@ -120,6 +126,9 @@ function UTF8ToString(ptr, maxBytesToRead) {
 // Returns the number of bytes written, EXCLUDING the null terminator.
 
 function stringToUTF8Array(str, heap, outIdx, maxBytesToWrite) {
+#if CAN_ADDRESS_2GB
+  outIdx >>>= 0;
+#endif
   if (!(maxBytesToWrite > 0)) // Parameter maxBytesToWrite is not optional. Negative values, 0, null, undefined and false each don't write out any bytes.
     return 0;
 
