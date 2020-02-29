@@ -2250,15 +2250,11 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
         force_archive_contents = all(t.endswith(STATICLIB_ENDINGS) for _, t in temp_files) or shared.Settings.LINKABLE
 
         # if  EMCC_DEBUG=2  then we must link now, so the temp files are complete.
-        # if using the wasm backend, we might be using vanilla LLVM, which does not allow our fastcomp deferred linking opts.
+        # if using the wasm backend, we might be using vanilla LLVM, which does not allow our
+        # fastcomp deferred linking opts.
         # TODO: we could check if this is a fastcomp build, and still speed things up here
         just_calculate = DEBUG != 2 and not shared.Settings.WASM_BACKEND
         if shared.Settings.WASM_BACKEND:
-          # If LTO is enabled then use the -O opt level as the LTO level
-          if options.llvm_lto:
-            lto_level = options.opt_level
-          else:
-            lto_level = 0
           all_externals = None
           if shared.Settings.LLD_REPORT_UNDEFINED:
             all_externals = get_all_js_library_funcs(misc_temp_files)
@@ -2266,7 +2262,12 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
             # TODO(sbc): This is an incomplete list of __invoke functions.  Perhaps add
             # support for wildcard to wasm-ld.
             all_externals += ['emscripten_longjmp_jmpbuf', '__invoke_void', '__invoke_i32_i8*_...']
-          final = shared.Building.link_lld(linker_inputs, DEFAULT_FINAL, lto_level=lto_level, all_external_symbols=all_externals)
+          # If we were given an explit --llvm-lto level convert it to lld's -lto-ON
+          # TODO(sbc): We should probably just remove `--llvm-lto` since it doesn't serve any
+          # special purpose above and beyond `-lto-O`.
+          if options.llvm_lto and not any(a.startswith('-lto-O') for a in linker_inputs):
+            linker_inputs.append('-lto-O%d' % options.llvm_lto)
+          final = shared.Building.link_lld(linker_inputs, DEFAULT_FINAL, all_external_symbols=all_externals)
         else:
           final = shared.Building.link(linker_inputs, DEFAULT_FINAL, force_archive_contents=force_archive_contents, just_calculate=just_calculate)
       else:
