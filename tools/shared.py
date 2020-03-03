@@ -771,6 +771,11 @@ class WarningManager(object):
           warning['enabled'] = False
         continue
 
+      if cmd_args[i] == '-pedantic':
+        for warning in WarningManager.warnings.values():
+          warning['enabled'] = True
+        continue
+
       if not cmd_args[i].startswith('-W'):
         continue
 
@@ -828,7 +833,7 @@ WarningManager.add_warning('separate-asm')
 WarningManager.add_warning('almost-asm')
 WarningManager.add_warning('invalid-input')
 # Don't show lecacy settings warnings by default
-WarningManager.add_warning('legacy-settings', enabled=False)
+WarningManager.add_warning('legacy-settings', enabled=False, part_of_all=False)
 
 
 class Configuration(object):

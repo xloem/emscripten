@@ -9793,8 +9793,8 @@ int main () {
     stderr = run_process(cmd, stderr=PIPE).stderr
     self.assertNotContained('WARNING', stderr)
 
-    # Adding -Wall or -Wlegacy-settings enables the warning
-    stderr = run_process(cmd + ['-Wall'], stderr=PIPE).stderr
+    # Adding -pedantic or -Wlegacy-settings enables the warning
+    stderr = run_process(cmd + ['-pedantic'], stderr=PIPE).stderr
     self.assertContained('WARNING: use of legacy setting: SPLIT_MEMORY', stderr)
     self.assertContained('[-Wlegacy-settings]', stderr)
 
