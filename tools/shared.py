@@ -771,11 +771,6 @@ class WarningManager(object):
           warning['enabled'] = False
         continue
 
-      if cmd_args[i] == '-pedantic':
-        for warning in WarningManager.warnings.values():
-          warning['enabled'] = True
-        continue
-
       if not cmd_args[i].startswith('-W'):
         continue
 
